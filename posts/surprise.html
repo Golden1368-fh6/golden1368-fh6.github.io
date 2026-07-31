@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>惊喜页面</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .pattern {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 12c-8 6-14 10-14 20 0 8 6 12 14 12s14-4 14-12c0-10-6-14-14-20z' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='2'/%3E%3Ccircle cx='40' cy='44' r='2' fill='rgba(255,255,255,0.12)'/%3E%3C/svg%3E");
+            background-size: 80px 80px;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .decobanana {
+            position: absolute;
+            font-size: 34px;
+            opacity: 0.18;
+            pointer-events: none;
+            animation: bananaFloat 6s ease-in-out infinite;
+        }
+        @keyframes bananaFloat {
+            0%, 100% { transform: rotate(-15deg) translateY(0); }
+            50% { transform: rotate(15deg) translateY(-24px); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 60px 70px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .page {
+            display: none;
+            text-align: center;
+        }
+        .page.active {
+            display: block;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        button {
+            position: relative;
+            padding: 16px 44px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        button:hover::after {
+            left: 100%;
+        }
+        button:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+        }
+        button:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+        }
+        .login-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 34px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        .login-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .input-wrap {
+            position: relative;
+        }
+        #password {
+            padding: 14px 20px 14px 46px;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
+            outline: none;
+            text-align: center;
+            width: 300px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            transition: border-color 0.2s, background 0.2s;
+        }
+        #password::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        #password:focus {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .lock-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .error {
+            color: #ffe5e5;
+            font-size: 14px;
+            display: none;
+            background: rgba(220, 60, 60, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+        .error.show {
+            display: block;
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .link-btn {
+            padding: 10px 24px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: none;
+            font-weight: normal;
+        }
+        .link-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: none;
+        }
+        .back-link {
+            display: block;
+            margin-top: 18px;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .back-link:hover {
+            color: #fff;
+        }
+        .success {
+            color: #eaffea;
+            font-size: 14px;
+            display: none;
+            background: rgba(60, 180, 60, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+        .success.show {
+            display: block;
+        }
+        .admin-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .admin-sub {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .surprise-text {
+            font-size: 40px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 44px;
+            letter-spacing: 1px;
+        }
+        .surprise-text #count {
+            display: inline-block;
+            animation: pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes pop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 18px;
+            opacity: 0;
+            animation: sparkle 1.2s ease forwards;
+            pointer-events: none;
+        }
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0) rotate(0deg); }
+            40% { opacity: 1; transform: scale(1.2) rotate(90deg); }
+            100% { opacity: 0; transform: scale(0) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="pattern"></div>
+    <div class="bubble" style="width:120px;height:120px;top:12%;left:12%;animation-delay:0s"></div>
+    <div class="bubble" style="width:70px;height:70px;top:70%;left:18%;animation-delay:1.5s"></div>
+    <div class="bubble" style="width:160px;height:160px;top:20%;right:12%;animation-delay:3s"></div>
+    <div class="bubble" style="width:90px;height:90px;bottom:15%;right:22%;animation-delay:2.2s"></div>
+    <div class="bubble" style="width:50px;height:50px;top:55%;left:45%;animation-delay:4s"></div>
+    <div class="decobanana" style="top:8%;right:18%;animation-delay:0.5s">🍌</div>
+    <div class="decobanana" style="top:32%;left:6%;animation-delay:2s">🍌</div>
+    <div class="decobanana" style="bottom:12%;right:8%;animation-delay:1.2s">🍌</div>
+    <div class="decobanana" style="bottom:22%;left:16%;animation-delay:3s">🍌</div>
+    <div class="decobanana" style="top:55%;right:26%;animation-delay:2.6s">🍌</div>
+
+    <div class="card">
+        <div id="login" class="page active">
+            <div class="login-form">
+                <div class="login-icon">🔒</div>
+                <p class="login-title">此内容已加密，请输入密码</p>
+                <div class="input-wrap">
+                    <span class="lock-icon">🔑</span>
+                    <input type="password" id="password" placeholder="请输入密码">
+                </div>
+                <button onclick="checkPassword()">确认</button>
+                <p class="error" id="error">密码错误，请重试</p>
+                <button class="link-btn" onclick="showPage('adminlogin')">🛠️ 管理员</button>
+            </div>
+        </div>
+        <div id="adminlogin" class="page">
+            <div class="login-form">
+                <div class="login-icon">🛠️</div>
+                <p class="login-title">请输入管理员密码</p>
+                <div class="input-wrap">
+                    <span class="lock-icon">🔑</span>
+                    <input type="password" id="adminpassword" placeholder="管理员密码">
+                </div>
+                <button onclick="checkAdminPassword()">确认</button>
+                <p class="error" id="adminerror">管理员密码错误，请重试</p>
+                <span class="back-link" onclick="showPage('login')">返回</span>
+            </div>
+        </div>
+        <div id="adminpanel" class="page">
+            <div class="login-form">
+                <div class="login-icon">⚙️</div>
+                <p class="admin-title">管理员面板</p>
+                <p class="admin-sub">更改普通用户密码</p>
+                <div class="input-wrap">
+                    <span class="lock-icon">🔑</span>
+                    <input type="password" id="newpassword" placeholder="新密码">
+                </div>
+                <div class="input-wrap">
+                    <span class="lock-icon">🔑</span>
+                    <input type="password" id="confirmpassword" placeholder="确认新密码">
+                </div>
+                <button onclick="saveNewPassword()">保存</button>
+                <p class="error" id="changeerror">两次密码不一致，请重试</p>
+                <p class="success" id="changesuccess">密码修改成功</p>
+                <span class="back-link" onclick="showPage('login')">返回登录</span>
+            </div>
+        </div>
+        <div id="home" class="page">
+            <button onclick="showSurprise()">🎉 点开有惊喜</button>
+        </div>
+        <div id="surprise" class="page">
+            <p class="surprise-text">banana有<span id="count"></span>颗搞完！</p>
+            <button onclick="goHome()">再来一次</button>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_PASSWORD_HASH = '04197cff64a8d7c4e9173de349217d296f38ed01f2e5790d53a7115b01e8a0d1';
+        const ADMIN_PASSWORD_HASH = 'dc3cd401470474b1675639a9610895e87673eca004ef19d86b8006bbc8696d1e';
+        const HASH_KEY = 'banana_password_hash';
+
+        function getPasswordHash() {
+            return localStorage.getItem(HASH_KEY) || DEFAULT_PASSWORD_HASH;
+        }
+
+        async function sha256(text) {
+            const data = new TextEncoder().encode(text);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function checkPassword() {
+            const input = document.getElementById('password').value;
+            const hash = await sha256(input);
+            if (hash === getPasswordHash()) {
+                showPage('home');
+                document.getElementById('error').classList.remove('show');
+                document.getElementById('password').value = '';
+            } else {
+                document.getElementById('error').classList.add('show');
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        }
+
+        async function checkAdminPassword() {
+            const input = document.getElementById('adminpassword').value;
+            const hash = await sha256(input);
+            if (hash === ADMIN_PASSWORD_HASH) {
+                showPage('adminpanel');
+                document.getElementById('adminerror').classList.remove('show');
+                document.getElementById('adminpassword').value = '';
+            } else {
+                document.getElementById('adminerror').classList.add('show');
+                document.getElementById('adminpassword').value = '';
+                document.getElementById('adminpassword').focus();
+            }
+        }
+
+        async function saveNewPassword() {
+            const newPass = document.getElementById('newpassword').value;
+            const confirmPass = document.getElementById('confirmpassword').value;
+            document.getElementById('changesuccess').classList.remove('show');
+            if (newPass !== confirmPass || newPass === '') {
+                document.getElementById('changeerror').classList.add('show');
+                document.getElementById('newpassword').value = '';
+                document.getElementById('confirmpassword').value = '';
+                return;
+            }
+            const hash = await sha256(newPass);
+            localStorage.setItem(HASH_KEY, hash);
+            document.getElementById('changeerror').classList.remove('show');
+            document.getElementById('newpassword').value = '';
+            document.getElementById('confirmpassword').value = '';
+            document.getElementById('changesuccess').classList.add('show');
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        document.getElementById('password').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+        document.getElementById('adminpassword').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') checkAdminPassword();
+        });
+
+        function showSurprise() {
+            const count = document.getElementById('count');
+            count.textContent = Math.floor(Math.random() * 1000) + 1;
+            showPage('surprise');
+            spawnSparkles();
+        }
+        function goHome() {
+            showPage('home');
+        }
+
+        function spawnSparkles() {
+            const emojis = ['✨', '🌟', '⭐', '💫'];
+            const card = document.querySelector('.card');
+            for (let i = 0; i < 10; i++) {
+                const s = document.createElement('span');
+                s.className = 'sparkle';
+                s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.animationDelay = (Math.random() * 0.5) + 's';
+                card.appendChild(s);
+                setTimeout(() => s.remove(), 1800);
+            }
+        }
+    </script>
+</body>
+</html>
