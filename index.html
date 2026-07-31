@@ -598,7 +598,7 @@
         }));
         const validPosts = posts.filter(Boolean).sort((a, b) => b.date.localeCompare(a.date));
         blogList.innerHTML = validPosts.map(post => `
-          <article class="blog-post fade-in">
+          <article class="blog-post">
             <div class="post-date">${post.date}</div>
             <h3>${post.title}</h3>
             <p>${post.excerpt}</p>
